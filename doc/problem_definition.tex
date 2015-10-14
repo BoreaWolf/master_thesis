@@ -1,0 +1,151 @@
+% Riccardo Orizio
+% 13 October 2015
+% Problem definition 2.0
+
+\documentclass[10pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{amssymb}
+
+% Every list item will start with a dash instead of a dot
+\def\labelitemi{--}
+
+\title{Problem definition}
+\author{Riccardo Orizio}
+\date{13 October 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem definition}
+
+Our problem concerns the need of a company to accomodate client requests to 
+specific time slots where the company will have more profit, given the actual
+requests status and the probable future requests.
+This problem treats a small part of a bigger problem which is the problem of 
+the attended home delivery services.
+
+First of all, the company needs to choose if the new incoming request will be 
+accepted or not: remember that every refused request is lost and cannot be 
+recovered in the future, so every declined request will cost to the company 
+because there will be no profit from it.
+If a request is accepted, then it has to fit in the already known request 
+calendar, knowing that every new request has a limited set of possible time 
+windows in which it could be served (usually the time windows are given due
+to geographical request studies) and that every request must respect its time 
+window.
+
+The goal of this problem is to bias the customers to make them choose what is 
+more suitable for the company, so it could reach the maximum profit or it 
+could serve the highest number of requests that it could do or whatever the 
+objective of the company is.
+The company will try to influence its customers through small price 
+incentives\footnote{There is no need to place big incentives, small are good 
+enough, knowledge given by home grocery delivery providers, Campbell and 
+Savelsbergh 2006.} over the possible time windows listed to them, so there is 
+a high probability that customers choose the time window that the company 
+wants them to pick.
+The problem is to place these incentives, that is to choose in which time 
+window they have to be placed and how big every one of them has to be.
+
+The problem is dynamic due to the fact that we keep receiving new requests even 
+after our planning is started; it's stochastic because we try to predict future 
+requests from the history and because we don't know when the request will come 
+neither how big the demand of each one will be.
+We use this information with the intention to keep the best incoming requests 
+and discarding the worsts.
+
+\section{Objective function}
+The objective function could vary depending on the priorities of the company,
+a couple examples are listed here:
+\begin{itemize}
+	\item \( MAX\ Profit = MAX\ \sum revenue -
+								\sum delivery\_costs -
+								\sum incentives \)
+
+	\item \( MAX\ Orders\_delivered \)
+\end{itemize}
+
+\section{Variables}
+\begin{description}
+	\item[\(C\)] 
+		customers spread into a limited geographical area, usually divided in
+		sub-zones (e.g. ZIP-code division, districts)
+	
+	\item[\(V\)]
+		company vehicles, each one having \(Q^{s}\) storage and \(Q^{f}\) 
+		fuel capacity\footnote{Every vehicle could have different capacities.}
+
+	\item[\(T\)]
+		delivery time window\footnote{Time windows could be overlapped with 
+		each other or not.} options, each being \(L\)\footnote{The larger 
+		the better: we have more flexibility. (Campbell and Savelsbergh, 2006).}
+		wide (time windows are chosen by the company itself)
+
+	\item[\(I_{t}\)]
+		possible incentives, one per time window
+
+	\item[\(p_{i}^{t}\)]
+		the probability that the customer \(i\) chooses the time window \(t\) 
+		to get his items delivered
+\end{description}
+
+\section{Constraints}
+\begin{itemize}
+	\item 
+		Don't exceed vehicles capacity, both storage and fuel (or delivery
+		costs)
+
+	\item 
+		Make sure that every delivery will stay in the defined time-window,
+		remembering also that every delivery has a service time\footnote{Time 
+		between vehicle arrival to the customer and its departure.}
+
+	\item
+		\( \forall t \in T : I_{t} \geq 0 \)
+\end{itemize}
+
+\section{Assumptions}
+\begin{itemize}
+	\item 
+		Real-time delivery are not available, we want at least 1-day notice
+		to create the best plan that we can
+
+	\item 
+		Delivered products are not subject to any particular restriction:
+		they are unbreakable and without expiry date (e.g.\ no food)
+
+%	\item 
+%		We treat every geographical region by itself, there isn't any possible
+%		interaction between two or more regions
+
+	\item 
+		We keep a low number of \(C\) customers because the problem is hard
+		to solve even with small sets of input
+
+	\item
+		\( \forall i\in V:Q_{i}^{s}=a,Q_{i}^{f}=b,a\,b\in\mathbb{{N}} \)
+\end{itemize}
+
+\section{Future extensions}
+\begin{itemize}
+	\item
+		Everything that could vary from the assumptions
+
+	\item
+		Different time-windows: different \(L\), overlap between windows
+
+	\item 
+		Predict customers: keep track of every request done by every customer 
+		so we could predict them even better, knowing their particular 
+		time window preferences and using those for placing incentives only 
+		when it's really necessary
+
+	\item 
+		Negative incentives: make the delivery cost more high for those 
+		customers that demand a specific delivery that is unprofitable for 
+		the company, without a negative incentive
+\end{itemize}
+
+\end{document}

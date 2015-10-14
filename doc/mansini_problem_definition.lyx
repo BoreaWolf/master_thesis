@@ -1,0 +1,315 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Part*
+Vechicle Routing Problems with Time-Window Incentives
+\end_layout
+
+\begin_layout Section*
+The incentive problem
+\end_layout
+
+\begin_layout Standard
+This problem treats the home delivery service issue: the need for a company
+ to create a routing plan for its vehicles so they could satisfy the highest
+ number of customer orders keeping a good overall profit.
+\end_layout
+
+\begin_layout Standard
+After buying what he needs, a customer chooses a particular time-window
+ when he wants his purchase to be delivered.
+ The company has to bias customers, with some sort of incentives on the
+ listed time-windows, so there is a high probability that the customer chooses
+ the time-window that the company wants him to pick.
+\end_layout
+
+\begin_layout Standard
+The main and most important part of this procedure is to place the incentives,
+ that is to choose in which time-window we should place them and how big
+ every incentive has to be.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This problem could be described as follows, having:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $C$
+\end_inset
+
+ customers/consumers spread into a limited geographical area (e.g.
+ ZIP-code division, districts)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $V$
+\end_inset
+
+ company vehicles, each one having 
+\begin_inset Formula $Q^{s}$
+\end_inset
+
+ storage and 
+\begin_inset Formula $Q^{f}$
+\end_inset
+
+ fuel capacity
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Every vehicle could have a different capacities.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $T$
+\end_inset
+
+ delivery time window
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Time windows could be overlapped with each other or not.
+\end_layout
+
+\end_inset
+
+ options, each being 
+\begin_inset Formula $L$
+\end_inset
+
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The larger the better: we have more flexibility.
+ (Campbell and Savelsbergh, 2005)
+\end_layout
+
+\end_inset
+
+ wide (time windows are chosen by the company itself)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $I_{t}$
+\end_inset
+
+ possible incentives, one per time window
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+\begin_inset Formula $p_{i}^{t}$
+\end_inset
+
+ the probability that the customer 
+\begin_inset Formula $i$
+\end_inset
+
+ chooses the time window 
+\begin_inset Formula $t$
+\end_inset
+
+ to get his items delivered
+\end_layout
+
+\begin_layout Standard
+Being restricted by:
+\end_layout
+
+\begin_layout Itemize
+Don't exceed vehicles capacity, both storage and fuel (or delivery costs)
+\end_layout
+
+\begin_layout Itemize
+Make sure that every delivery will stay in the defined time-window, remembering
+ also that every delivery has a service time
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Time between vehicle arrival to the customer and its departure.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\forall t\in T:I_{t}\geq0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Knowing that the final objective could be:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $MAX\ Profit=MAX\ \sum revenue-\sum delivery\_costs-\sum incentives$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $MAX\ Orders\_delivered$
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We also make some assumptions:
+\end_layout
+
+\begin_layout Itemize
+Real-time delivery are not available, we want at least 1-day notice to create
+ the best plan that we can
+\end_layout
+
+\begin_layout Itemize
+Delivered products are not subject to any particular restriction: they are
+ unbreakable and without expiry date (e.g.
+ no food)
+\end_layout
+
+\begin_layout Itemize
+We treat every geographical region by itself, there isn't any possible interacti
+on between two or more regions
+\end_layout
+
+\begin_layout Itemize
+We keep a low number of 
+\begin_inset Formula $C$
+\end_inset
+
+ customers because the problem is hard to solve even with small sets of
+ input
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\forall i\in V:Q_{i}^{s}=a,Q_{i}^{f}=b,a\,b\in\mathbb{{N}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Future extensions or possible changes:
+\end_layout
+
+\begin_layout Itemize
+Everything that could vary from the assumptions
+\end_layout
+
+\begin_layout Itemize
+Different time-windows: different 
+\begin_inset Formula $L$
+\end_inset
+
+, overlap between windows
+\end_layout
+
+\begin_layout Itemize
+Predict customers: study customers behaviour to predict their choices, knowing
+ that they could be biased by incentives
+\end_layout
+
+\begin_layout Itemize
+Negative incentives: make the delivery cost more high for those customers
+ that demand a specific delivery that is unprofitable for the company, without
+ a negative incentive
+\end_layout
+
+\end_body
+\end_document

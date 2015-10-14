@@ -1,0 +1,91 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{amssymb}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxlist}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{#1}
+ \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{\labelsep}
+ \renewcommand{\makelabel}[1]{##1\hfil}}}
+{\end{list}}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+
+\part*{Vechicle Routing Problems with Time-Window Incentives}
+
+
+\section*{The incentive problem}
+
+This problem treats the home delivery service issue: the need for
+a company to create a routing plan for its vehicles so they could
+satisfy the highest number of customer orders keeping a good overall
+profit.
+
+After buying what he needs, a customer chooses a particular time-window
+when he wants his purchase to be delivered. The company has to bias
+customers, with some sort of incentives on the listed time-windows,
+so there is a high probability that the customer chooses the time-window
+that the company wants him to pick.
+
+The main and most important part of this procedure is to place the
+incentives, that is to choose in which time-window we should place
+them and how big every incentive has to be.\\
+\\
+This problem could be described as follows, having:
+\begin{lyxlist}{00.00.0000}
+\item [{$C$}] customers/consumers spread into a limited geographical area
+(e.g. ZIP-code division, districts)
+\item [{$V$}] company vehicles, each one having $Q^{s}$ storage and $Q^{f}$
+fuel capacity\footnote{Every vehicle could have a different capacities.}
+\item [{$T$}] delivery time window\footnote{Time windows could be overlapped with each other or not.}
+options, each being $L$\footnote{The larger the better: we have more flexibility. (Campbell and Savelsbergh,
+2005)} wide (time windows are chosen by the company itself)
+\item [{$I_{t}$}] possible incentives, one per time window
+\item [{$p_{i}^{t}$}] the probability that the customer $i$ chooses the
+time window $t$ to get his items delivered
+\end{lyxlist}
+Being restricted by:
+\begin{itemize}
+\item Don't exceed vehicles capacity, both storage and fuel (or delivery
+costs)
+\item Make sure that every delivery will stay in the defined time-window,
+remembering also that every delivery has a service time\footnote{Time between vehicle arrival to the customer and its departure.}
+\item $\forall t\in T:I_{t}\geq0$
+\end{itemize}
+Knowing that the final objective could be:
+\begin{itemize}
+\item $MAX\ Profit=MAX\ \sum revenue-\sum delivery\_costs-\sum incentives$
+\item $MAX\ Orders\_delivered$\newpage{}
+\end{itemize}
+We also make some assumptions:
+\begin{itemize}
+\item Real-time delivery are not available, we want at least 1-day notice
+to create the best plan that we can
+\item Delivered products are not subject to any particular restriction:
+they are unbreakable and without expiry date (e.g. no food)
+\item We treat every geographical region by itself, there isn't any possible
+interaction between two or more regions
+\item We keep a low number of $C$ customers because the problem is hard
+to solve even with small sets of input
+\item $\forall i\in V:Q_{i}^{s}=a,Q_{i}^{f}=b,a\,b\in\mathbb{{N}}$
+\end{itemize}
+Future extensions or possible changes:
+\begin{itemize}
+\item Everything that could vary from the assumptions
+\item Different time-windows: different $L$, overlap between windows
+\item Predict customers: study customers behaviour to predict their choices,
+knowing that they could be biased by incentives
+\item Negative incentives: make the delivery cost more high for those customers
+that demand a specific delivery that is unprofitable for the company,
+without a negative incentive\end{itemize}
+
+\end{document}
