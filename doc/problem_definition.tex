@@ -6,9 +6,18 @@
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
 \usepackage{amssymb}
+\usepackage{color,soul}
+\usepackage[usenames,dvipsnames]{xcolor}
 
 % Every list item will start with a dash instead of a dot
 \def\labelitemi{--}
+
+% Personal commands
+% Highlighting text with different colors
+\newcommand{\hlc}[2]{\sethlcolor{#1} \hl{#2}}
+\newcommand{\news}[1]{\hlc{green}{#1}}
+\newcommand{\delete}[1]{\hlc{red}{#1}}
+\newcommand{\extras}[1]{\newline\fbox{\parbox{\textwidth}{\hlc{orange}{#1}}}\newline}
 
 \title{Problem definition}
 \author{Riccardo Orizio}
@@ -24,12 +33,14 @@ Our problem concerns the need of a company to accomodate client requests to
 specific time slots where the company will have more profit, given the actual
 requests status and the probable future requests.
 This problem treats a small part of a bigger problem which is the problem of 
-the attended home delivery services.
+the attended home delivery services \news{for furnitures and appliances}.
 
 First of all, the company needs to choose if the new incoming request will be 
 accepted or not: remember that every refused request is lost and cannot be 
 recovered in the future, so every declined request will cost to the company 
 because there will be no profit from it.
+\extras{apparently we can accept EVERY new customer because the company could 
+rent as many vehicle as it wants. Every new vehicle has a fixed rent cost.}
 If a request is accepted, then it has to fit in the already known request 
 calendar, knowing that every new request has a limited set of possible time 
 windows in which it could be served (usually the time windows are given due
@@ -38,8 +49,8 @@ window.
 
 The goal of this problem is to bias the customers to make them choose what is 
 more suitable for the company, so it could reach the maximum profit or it 
-could serve the highest number of requests that it could do or whatever the 
-objective of the company is.
+could serve the highest number of requests that it could do or 
+\news{has the minimum costs through clusterization of customers}.
 The company will try to influence its customers through small price 
 incentives\footnote{There is no need to place big incentives, small are good 
 enough, knowledge given by home grocery delivery providers, Campbell and 
@@ -48,6 +59,8 @@ a high probability that customers choose the time window that the company
 wants them to pick.
 The problem is to place these incentives, that is to choose in which time 
 window they have to be placed and how big every one of them has to be.
+\extras{Every customer has to pay a fixed fee for the delivery service.
+JF suggested something like 50\$, independent to the distance traveled.}
 
 The problem is dynamic due to the fact that we keep receiving new requests even 
 after our planning is started; it's stochastic because we try to predict future 
@@ -76,6 +89,9 @@ a couple examples are listed here:
 	\item[\(V\)]
 		company vehicles, each one having \(Q^{s}\) storage and \(Q^{f}\) 
 		fuel capacity\footnote{Every vehicle could have different capacities.}
+
+		vehicles that the company could rent, at a fixed cost \(F\), 
+		each one having capacity \(Q\)
 
 	\item[\(T\)]
 		delivery time window\footnote{Time windows could be overlapped with 
