@@ -1,0 +1,25 @@
+% Riccardo Orizio
+% 15 October 2015
+% Trying to draw a graph
+
+\documentclass[tikz,border=10pt]{standalone}
+
+\usetikzlibrary{graphdrawing}
+\usetikzlibrary{graphs}
+\usegdlibrary{trees}
+
+\begin{document}
+
+\begin{tikzpicture}[>=stealth, every node/.style={circle, draw, minimum size=0.75cm}]
+\greph [tree layout, grow=down, fresh nodes, level distance=0.5in, sibling distance=0.5in]
+	{
+		4 -> 
+		{
+			3 -> { 1 -> { 5, " " }, 2, 2 }
+			3 -> { 1, 2, 3 }
+			3 -> { "a", b, "C" }
+		}
+	};
+\end{tikzpicture}
+
+\end{document}
