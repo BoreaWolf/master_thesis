@@ -3,6 +3,7 @@
 % Problem definition 2.0
 
 \documentclass[10pt, letterpaper]{article}
+
 \usepackage[utf8]{inputenc}
 \usepackage{mathtools}
 \usepackage{amssymb}
@@ -16,7 +17,7 @@
 % Highlighting text with different colors
 \newcommand{\hlc}[2]{\sethlcolor{#1} \hl{#2}}
 \newcommand{\news}[1]{\hlc{green}{#1}}
-\newcommand{\delete}[1]{\hlc{red}{#1}}
+\newcommand{\todelete}[1]{\hlc{red}{#1}}
 \newcommand{\extras}[1]{\newline\fbox{\parbox{\textwidth}{\hlc{orange}{#1}}}\newline}
 
 \title{Problem definition}
@@ -50,7 +51,7 @@ window.
 The goal of this problem is to bias the customers to make them choose what is 
 more suitable for the company, so it could reach the maximum profit or it 
 could serve the highest number of requests that it could do or 
-\news{has the minimum costs through clusterization of customers}.
+\news{get the minimum costs through clusterization of customers}.
 The company will try to influence its customers through small price 
 incentives\footnote{There is no need to place big incentives, small are good 
 enough, knowledge given by home grocery delivery providers, Campbell and 
@@ -69,49 +70,84 @@ neither how big the demand of each one will be.
 We use this information with the intention to keep the best incoming requests 
 and discarding the worsts.
 
+\section{Model}
+\news{ADDED}
+
+The pappappero routing with TWs and stocaz customers is defined as follows.
+We have a set of known customers $C$, each one with a service time $s_{i}$ and 
+a demand to be served $q_{i}$, spread into a limited geographical area, 
+usually divided in sub-zones (e.g.\ ZIP-code division, districts), stored in set
+$Z$. The company could count on almost an infinite number of vehicles because 
+every vehicle could be rented at a fixed cost $f$, each of them has a capacity 
+$q$ and from now on they will be referenced as $k \in K$, set of all vehicles 
+available to the company. The set of time windows is known as $T$ and for every 
+one of them there could be an incentive $I_{t}$ which, paired with every 
+customer $i$, has a probability $p^{t}_{i}$ to be chosen by the customer $i$ as 
+his delivery time window. We will refer to new upcoming customers with $c \in U$.
+To reach our goal we need to take some decisions based on at least one possible 
+future scenario $\omega$, taken from the set of all scenarios $\Omega$.
+A single scenario $\omega$ is nothing more then the union of the known 
+customers $C$ and a subset of the future customers $U$: 
+\( \omega = ( U \cup C ) \).
+
+
 \section{Objective function}
 The objective function could vary depending on the priorities of the company,
 a couple examples are listed here:
 \begin{itemize}
-	\item \( MAX\ Profit = MAX\ \sum revenue -
+	\item \( MAX\ profit = MAX\ \sum revenue -
 								\sum delivery\_costs -
 								\sum incentives \)
 
-	\item \( MAX\ Orders\_delivered \)
+	\item \( MAX\ orders\_delivered \)
+
+	\item \( MIN\ costs \) \news{ADDED}
 \end{itemize}
 
 \section{Variables}
+\ 
+\extras{Rewritten in the model section, after JK suggestion}
 \begin{description}
-	\item[\(C\)] 
-		customers spread into a limited geographical area, usually divided in
-		sub-zones (e.g. ZIP-code division, districts)
+	\item[$C$] 
+		known customers spread into a limited geographical area, usually 
+		divided in sub-zones (e.g. ZIP-code division, districts).
+		Every $i \in C$ customer has a service time $s_{i}$ and a demand $q_{i}$
 	
-	\item[\(V\)]
-		company vehicles, each one having \(Q^{s}\) storage and \(Q^{f}\) 
-		fuel capacity\footnote{Every vehicle could have different capacities.}
+	\item[$K$]
+		\todelete{company vehicles, each one having $Q^{s}$ storage and $Q^{f}$ 
+		fuel capacity\footnote{Every vehicle could have different capacities.}}
 
-		vehicles that the company could rent, at a fixed cost \(F\), 
-		each one having capacity \(Q\)
+		\news{vehicles that the company could rent, at a fixed cost $F$, 
+		each one having capacity $Q$}
 
-	\item[\(T\)]
+	\item[$T$]
 		delivery time window\footnote{Time windows could be overlapped with 
 		each other or not.} options, each being \(L\)\footnote{The larger 
 		the better: we have more flexibility. (Campbell and Savelsbergh, 2006).}
 		wide (time windows are chosen by the company itself)
 
-	\item[\(I_{t}\)]
+	\item[$I_{t}$]
 		possible incentives, one per time window
 
-	\item[\(p_{i}^{t}\)]
+	\item[$p_{i}^{t}$]
 		the probability that the customer \(i\) chooses the time window \(t\) 
 		to get his items delivered
+
+	\item[$U$]
+		\news{set of incoming customers, one will be addressed as $c$}
+
+	\item[$Z$]
+		\news{set of zones}
+
+	\item[$\Omega$]
+		\news{set of scenarios, $\omega \in \Omega = ( U \cup C )$}
 \end{description}
 
 \section{Constraints}
 \begin{itemize}
 	\item 
-		Don't exceed vehicles capacity, both storage and fuel (or delivery
-		costs)
+		Don't exceed vehicles capacity \news{$q$}
+		\todelete{, both storage and fuel (or delivery costs)}
 
 	\item 
 		Make sure that every delivery will stay in the defined time-window,
