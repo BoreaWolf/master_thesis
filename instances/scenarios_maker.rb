@@ -8,26 +8,39 @@ require_relative "filenames.rb"
 require_relative "RandomGaussian.rb"
 
 # Constants
-ZONE_WIDTH = 7
+DEFAULT_SCENARIOS = 4
+ZONE_WIDTH = 10
 ZONE_HEIGHT = 7
 CLIENTS_MAX = 100
 CLIENTS_MIN = 30
-SD = 0.1
+STD_DEV = 0.1
+
+# Useful functions
+# This function calculates the cumulative sum of an array
+class Array
+	def cumulative_sum
+		sum = 0
+		self.map{ |x| sum += x }
+	end
+end
 
 # We have two possibles arguments:
 # ARGV[0] = number of scenarios to create
 # ARGV[1] = zonegrid filename
 # If no zonegrid filename is given, then we will use the most recent one.
-scenarios = ( ARGV[ 0 ] || 4 ).to_i
+scenarios = ( ARGV[ 0 ] || DEFAULT_SCENARIOS ).to_i
+# TODO: fix depending on the input that we give
 zonegrid = ARGV[ 1 ]
 if zonegrid == nil then
-	inst_dir = Dir[ DIR_INSTANCES + "/*" + FILE_EXT_INSTANCE ].sort
-
-	zonegrid = inst_dir.last
+	zonegrid = Dir[ "#{DIR_INSTANCES}/*#{FILE_EXT_INSTANCE}" ].sort.last
 end
 
-Zone = Struct.new( :zone_number, :clients, :demand, :service_time )
-zones = Array.new
+# Creating the data structures needed: zone and client
+Zone = Struct.new(	:zone_number,
+					:clients,
+					:demand,
+					:service_time )
+
 ClientRequest = Struct.new( :zone_number,
 							:x,
 							:y,
@@ -36,80 +49,86 @@ ClientRequest = Struct.new( :zone_number,
 							:date,
 							:cost )
 
-# Reading all the informations from the file with a REGEX ^_^
+# Reading all the informations of the zones from the file with a REGEX ^_^
+zones = Array.new
 content = File.open( zonegrid ).read.scan( /(\d+(\.\d+)?)/ ).collect{ |elem| elem[0] }
-for i in (0..content.length-1).step(4) do
+(0..content.length-1).step(4).each do |i|
 	zones.push( Zone.new(	content[i].to_i,
 							content[i+1].to_i,
 							content[i+2].to_f,
-							content[i+3].to_f ) )
+							content[i+3].to_f )
+			  )
 end
 
-# Calculating the number of clients and the columns of the grid
-total_clients = zones.collect{ |elem| elem[:clients] }.inject{ |sum, x| sum + x }
+# Calculating the cumulative sum array, useful to find in which zone every
+# random client will go
+prog_clients = zones.collect{ |x| x[:clients] }.cumulative_sum 
+# Counting the columns of the grid knowing that every zone is delimited with 
+# brackets, so i just count them
 cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 
-#	# Reading the zone file
-#	file_read = File.open( zonegrid )
-#	file_read.each do |line|
-#		content = line.chomp.split( "\t" )
-#		cols = content.length
-#	
-#		content.each{	|zone|
-#			a = zone[1, zone.length-2].split( "," )
-#			zones.push( Zone.new(	a[0].to_i,
-#									a[1].to_i,
-#									a[2].to_f, 
-#									a[3].to_f ) )
-#			total_clients += a[1].to_i
-#		}
-#	end
-#	file_read.close
-#	
-
-#	prog_clients = zones.map{ |sum, x| sum += x[:clients] }
-#	puts prog_clients
-
 # Creating shits
-dir_name = DIR_SCENARIOS + "/Scenario_" + 
-		   zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
+# Creating the directory of the instance, if it doesn't exist already
+# TODO: ask Alice if she wants something like Instance_# or # is enough
+dir_name = "#{DIR_SCENARIOS}/" + 
+		zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
 Dir.mkdir( dir_name ) unless File.exists?( dir_name )
 
+# Getting the number of scenarios already created
+dirs = Dir.glob( dir_name + "/*" ).select{ |x| File.directory? x }
+dirs = dirs.map{ |x| x.scan( /#{DIR_SINGLE_SCENARIO}(\d+)/ ) }.flatten.map( &:to_i ).sort
+scenario_number =	if dirs.empty? then
+						1
+					else
+						Integer( dirs.last ) + 1
+					end
+
+# Creating the folder for this session
+dir_name += "/#{DIR_SINGLE_SCENARIO}#{scenario_number}"
+Dir.mkdir( dir_name ) unless File.exists?( dir_name )
+
+# Array that keeps the clients of the current scenario created.
+# It will be cleared at every step
 scenario = Array.new
-for k in (1..scenarios)
-	scenario_clients = rand( CLIENTS_MIN..CLIENTS_MAX )
+
+(1..scenarios).each do |k|
+
+	# Clearing the scenario
 	scenario.clear
-	prog_clients = Array.new( zones.length )
-	prog_clients[0] = zones[0][:clients]
-	for i in 1..prog_clients.length-1 do
-		prog_clients[i] = prog_clients[i-1] + zones[i][:clients]
-	end
 
-	for i in 1..scenario_clients do
-		client_zone = rand( 1..total_clients )
-		for j in 0..prog_clients.length-1 do
-			if client_zone < prog_clients[j] then
-				break
-			end
-		end
+	# Creating the clients:
+	scenario_clients = rand( CLIENTS_MIN..CLIENTS_MAX )
+	# First I have to find in which area it belongs
+	(1..scenario_clients).each do
 
-		# We have the zone j, yeah
+		# Creating a client extracting a number between 1 and the total number
+		# of clients, taken from the cumulative sum array
+		client_zone = rand( 1..prog_clients.last )
+
+		# Getting his zone
+		zone_number = prog_clients.find_index{ |x| client_zone <= x }
+
+		# We have the zone, yeah
+		# Then we save him in the scenario with his other informations
+		# randomly generated
 		scenario.push(
 			ClientRequest.new(
-				j+1,
-				rand( 0..ZONE_WIDTH ) + (j%cols) * ZONE_WIDTH,
-				rand( 0..ZONE_HEIGHT ) + (j/cols) * ZONE_HEIGHT,
-				RandomGaussian.new( zones[j][:demand], SD ).rand,
-				RandomGaussian.new( zones[j][:service_time], SD ).rand,
+				zone_number+1,
+				rand( 0..ZONE_WIDTH ) + (zone_number%cols) * ZONE_WIDTH,
+				rand( 0..ZONE_HEIGHT ) + (zone_number/cols) * ZONE_HEIGHT,
+				RandomGaussian.new( zones[zone_number][:demand], STD_DEV ).rand,
+				RandomGaussian.new( zones[zone_number][:service_time], STD_DEV ).rand,
 				Time.now, # TODO: JFC
 				rand( 0..100 ) + 50 ) # TODO: JFC
 		)
 	end
 
 	# TODO: Check name with JFC?
-	file_write_name = dir_name + "/" + k.to_s + FILE_EXT_SCENARIO
+	file_write_name = "#{dir_name}/#{k}#{FILE_EXT_SCENARIO}"
 	file_write = File.open( file_write_name, "w" )
 
+	# TODO: Check if this is really needed
+	# Preamble
 	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\tCOST\tDATE\n" )
 	scenario.each_with_index{ |client, h|
 		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%7.3f\t%7.3f\t%3d\t%d\n",
@@ -126,4 +145,7 @@ for k in (1..scenarios)
 	file_write.close
 end
 
-puts "Fuck yeah! (◕‿◕✿)"
+printf( "Fuck yeah! Instance %s, Scenario %d, %d scenarios created. (◕‿◕✿)\n",
+	   zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" ),
+	   scenario_number,
+	   scenarios )
