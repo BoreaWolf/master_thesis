@@ -10,6 +10,8 @@ require_relative "RandomGaussian.rb"
 # Constants
 ZONE_WIDTH = 7
 ZONE_HEIGHT = 7
+CLIENTS_MAX = 100
+CLIENTS_MIN = 30
 SD = 0.1
 
 # We have two possibles arguments:
@@ -33,7 +35,6 @@ ClientRequest = Struct.new( :zone_number,
 							:service_time,
 							:date,
 							:cost )
-Scenario = Array.new
 
 # Reading all the informations from the file with a REGEX ^_^
 content = File.open( zonegrid ).read.scan( /(\d+(\.\d+)?)/ ).collect{ |elem| elem[0] }
@@ -66,40 +67,63 @@ cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 #	file_read.close
 #	
 
-prog_clients = zones.map{ |sum, x| sum += x[:clients] }
-puts prog_clients
-#	# Creating shits
-#	scenario_clients = 10
-#	prog_clients = Array.new( zones.length )
-#	prog_clients[0] = zones[0][:clients]
-#	for i in 1..prog_clients.length-1 do
-#		prog_clients[i] = prog_clients[i-1] + zones[i][:clients]
-#	end
-#	
-#	for i in 1..scenario_clients do
-#		client_zone = rand( 1..total_clients )
-#		for j in 0..prog_clients.length-1 do
-#			if client_zone < prog_clients[j] then
-#				break
-#			end
-#		end
-#	
-#		# We have the zone, yeah
-#		Scenario.push(
-#			ClientRequest.new(
-#				j,
-#				rand( 0..ZONE_WIDTH ) + (j%cols) * ZONE_WIDTH,
-#				rand( 0..ZONE_HEIGHT ) + (j/cols) * ZONE_HEIGHT,
-#				RandomGaussian.new( zones[j][:demand], SD ).rand,
-#				RandomGaussian.new( zones[j][:service_time], SD ).rand,
-#				Time.now,
-#				rand( 0..100 ) + 50 ) )
-#	
-#	
-#		
-#	end
-#	
-#	puts zones
-#	puts total_clients
-#	#puts content.each{ |x| puts x }
-#	#puts content.class
+#	prog_clients = zones.map{ |sum, x| sum += x[:clients] }
+#	puts prog_clients
+
+# Creating shits
+dir_name = DIR_SCENARIOS + "/Scenario_" + 
+		   zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
+Dir.mkdir( dir_name ) unless File.exists?( dir_name )
+
+scenario = Array.new
+for k in (1..scenarios)
+	scenario_clients = rand( CLIENTS_MIN..CLIENTS_MAX )
+	scenario.clear
+	prog_clients = Array.new( zones.length )
+	prog_clients[0] = zones[0][:clients]
+	for i in 1..prog_clients.length-1 do
+		prog_clients[i] = prog_clients[i-1] + zones[i][:clients]
+	end
+
+	for i in 1..scenario_clients do
+		client_zone = rand( 1..total_clients )
+		for j in 0..prog_clients.length-1 do
+			if client_zone < prog_clients[j] then
+				break
+			end
+		end
+
+		# We have the zone j, yeah
+		scenario.push(
+			ClientRequest.new(
+				j+1,
+				rand( 0..ZONE_WIDTH ) + (j%cols) * ZONE_WIDTH,
+				rand( 0..ZONE_HEIGHT ) + (j/cols) * ZONE_HEIGHT,
+				RandomGaussian.new( zones[j][:demand], SD ).rand,
+				RandomGaussian.new( zones[j][:service_time], SD ).rand,
+				Time.now, # TODO: JFC
+				rand( 0..100 ) + 50 ) # TODO: JFC
+		)
+	end
+
+	# TODO: Check name with JFC?
+	file_write_name = dir_name + "/" + k.to_s + FILE_EXT_SCENARIO
+	file_write = File.open( file_write_name, "w" )
+
+	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\tCOST\tDATE\n" )
+	scenario.each_with_index{ |client, h|
+		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%7.3f\t%7.3f\t%3d\t%d\n",
+				h+1,
+				client[:zone_number],
+				client[:x],
+				client[:y],
+				client[:demand],
+				client[:service_time],
+				client[:cost],
+				client[:date].to_i )
+	}
+
+	file_write.close
+end
+
+puts "Fuck yeah! (◕‿◕✿)"
