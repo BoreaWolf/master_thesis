@@ -11,9 +11,12 @@ require_relative "RandomGaussian.rb"
 DEFAULT_SCENARIOS = 4
 ZONE_WIDTH = 10
 ZONE_HEIGHT = 7
-CLIENTS_MAX = 100
-CLIENTS_MIN = 30
-STD_DEV = 0.1
+
+CLIENTS_AVERAGE = 100
+CLIENTS_STD_DEV = 15
+
+DEMAND_STD_DEV = 20
+SERVICE_STD_DEV = 20
 
 # Useful functions
 # This function calculates the cumulative sum of an array
@@ -45,9 +48,7 @@ ClientRequest = Struct.new( :zone_number,
 							:x,
 							:y,
 							:demand,
-							:service_time,
-							:date,
-							:cost )
+							:service_time)
 
 # Reading all the informations of the zones from the file with a REGEX ^_^
 zones = Array.new
@@ -62,15 +63,15 @@ end
 
 # Calculating the cumulative sum array, useful to find in which zone every
 # random client will go
-prog_clients = zones.collect{ |x| x[:clients] }.cumulative_sum 
-# Counting the columns of the grid knowing that every zone is delimited with 
+prog_clients = zones.collect{ |x| x[:clients] }.cumulative_sum
+# Counting the columns of the grid knowing that every zone is delimited with
 # brackets, so i just count them
 cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 
 # Creating shits
 # Creating the directory of the instance, if it doesn't exist already
 # TODO: ask Alice if she wants something like Instance_# or # is enough
-dir_name = "#{DIR_SCENARIOS}/" + 
+dir_name = "#{DIR_SCENARIOS}/" +
 		zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
 Dir.mkdir( dir_name ) unless File.exists?( dir_name )
 
@@ -97,7 +98,7 @@ scenario = Array.new
 	scenario.clear
 
 	# Creating the clients:
-	scenario_clients = rand( CLIENTS_MIN..CLIENTS_MAX )
+	scenario_clients = RandomGaussian.new( CLIENTS_AVERAGE, CLIENTS_STD_DEV ).rand.to_i
 	# First I have to find in which area it belongs
 	(1..scenario_clients).each do
 
@@ -116,11 +117,8 @@ scenario = Array.new
 				zone_number+1,
 				rand( 0..ZONE_WIDTH ) + (zone_number%cols) * ZONE_WIDTH,
 				rand( 0..ZONE_HEIGHT ) + (zone_number/cols) * ZONE_HEIGHT,
-				RandomGaussian.new( zones[zone_number][:demand], STD_DEV ).rand,
-				RandomGaussian.new( zones[zone_number][:service_time], STD_DEV ).rand,
-				Time.now, # TODO: JFC
-				rand( 0..100 ) + 50 ) # TODO: JFC
-		)
+				RandomGaussian.new( zones[zone_number][:demand], DEMAND_STD_DEV ).rand,
+				RandomGaussian.new( zones[zone_number][:service_time], SERVICE_STD_DEV ).rand))
 	end
 
 	# TODO: Check name with JFC?
@@ -129,17 +127,15 @@ scenario = Array.new
 
 	# TODO: Check if this is really needed
 	# Preamble
-	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\tCOST\tDATE\n" )
+	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\n" )
 	scenario.each_with_index{ |client, h|
-		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%7.3f\t%7.3f\t%3d\t%d\n",
+		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%7.3f\t%7.3f\n",
 				h+1,
 				client[:zone_number],
 				client[:x],
 				client[:y],
 				client[:demand],
-				client[:service_time],
-				client[:cost],
-				client[:date].to_i )
+				client[:service_time])
 	}
 
 	file_write.close
