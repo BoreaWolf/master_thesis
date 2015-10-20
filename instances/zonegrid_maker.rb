@@ -15,12 +15,10 @@ LOW_POP = 0.10
 CLIENT_RANGE_HIGH = [ 70, 100 ]
 CLIENT_RANGE_NORMAL = [ 10, 70 ]
 CLIENT_RANGE_LOW = [ 1, 10 ]
-DEMAND_MIN = 10.0
-DEMAND_MAX = 120.0
-SERVICE_TIME_MIN = 30.0
-SERVICE_TIME_MAX = 300.0
-#RICH_ZONES = 0.20
-#POOR_ZONES = 0.20
+DEMAND_MIN = 10
+DEMAND_MAX = 120
+SERVICE_TIME_MIN = 30
+SERVICE_TIME_MAX = 300
 
 # Get dimensions m x n from command line
 rows = ( ARGV[ 0 ] || 2 ).to_i
@@ -45,9 +43,9 @@ for i in 1..zone_number
 		cli = rand( CLIENT_RANGE_NORMAL[0]..CLIENT_RANGE_NORMAL[1] )
 	end
 
-	zones.push( Zone.new( cli, 
-						  rand( DEMAND_MIN..DEMAND_MAX ), 
-						  rand( SERVICE_TIME_MIN..SERVICE_TIME_MAX ) ) 
+	zones.push( Zone.new( cli,
+						  rand( DEMAND_MIN..DEMAND_MAX ),
+						  rand( SERVICE_TIME_MIN..SERVICE_TIME_MAX ) )
 			  )
 end
 
@@ -57,16 +55,15 @@ zones = zones.shuffle
 # File handling
 # Creating the file name with the current time plus its extension
 file_name = DIR_INSTANCES + "/" + Time.now.strftime( "%Y-%m-%d_%H:%M:%S" ) + FILE_EXT_INSTANCE
+
 file_temp = File.open( file_name, "w" )
 # Keeping this for tests:
 # file_temp = File.open( "1pappappero.instance", "w" )
 
 # We suppose that every value could reach maximum a 3 digits integer part.
-# To make this happen also for floating point values we need to count also the
-# 3 decimal digits and the point, this leads us to %7.3f.
 # We print every zone on the file
 for j in 0..zone_number-1
-	file_temp.printf( "(%3d, %3d, %7.3f, %7.3f)\t", 
+	file_temp.printf( "(%3d, %3d, %3d, %3d)\t",
 						j+1,
 						zones[j][:clients],
 						zones[j][:demand],

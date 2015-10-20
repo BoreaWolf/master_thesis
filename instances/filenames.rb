@@ -5,7 +5,6 @@
 # Parameters
 
 FILE_EXT_INSTANCE = ".instance"
-FILE_EXT_SCENARIO = ".scenario"
+FILE_EXT_SET = ".set"
 DIR_INSTANCES = "./instances"
 DIR_SCENARIOS = "./scenarios"
-DIR_SINGLE_SCENARIO = "Scenario_"

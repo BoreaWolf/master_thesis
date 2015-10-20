@@ -5,7 +5,7 @@
 # A program that generates a given number of scenarios, starting from a zonegrid.
 
 require_relative "filenames.rb"
-require_relative "RandomGaussian.rb"
+require_relative "NormalDistribution.rb"
 
 # Constants
 DEFAULT_SCENARIOS = 4
@@ -18,6 +18,7 @@ CLIENTS_STD_DEV = 15
 DEMAND_STD_DEV = 20
 SERVICE_STD_DEV = 20
 
+VEHICLE_CAPACITY = 80
 # Useful functions
 # This function calculates the cumulative sum of an array
 class Array
@@ -70,36 +71,39 @@ cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 
 # Creating shits
 # Creating the directory of the instance, if it doesn't exist already
-# TODO: ask Alice if she wants something like Instance_# or # is enough
 dir_name = "#{DIR_SCENARIOS}/" +
 		zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
 Dir.mkdir( dir_name ) unless File.exists?( dir_name )
 
-# Getting the number of scenarios already created
-dirs = Dir.glob( dir_name + "/*" ).select{ |x| File.directory? x }
-dirs = dirs.map{ |x| x.scan( /#{DIR_SINGLE_SCENARIO}(\d+)/ ) }.flatten.map( &:to_i ).sort
-scenario_number =	if dirs.empty? then
+# Getting the number of set of scenarios already created
+sets = Dir.glob( dir_name + "/*" ).select{ |x| File.file? x }
+sets = sets.map{ |x| x.scan( /(\d+)#{FILE_EXT_SET}/ ) }.flatten.map( &:to_i ).sort
+set_number =	if sets.empty? then
 						1
 					else
-						Integer( dirs.last ) + 1
+						Integer( sets.last ) + 1
 					end
 
-# Creating the folder for this session
-dir_name += "/#{DIR_SINGLE_SCENARIO}#{scenario_number}"
-Dir.mkdir( dir_name ) unless File.exists?( dir_name )
+# Creating the file for the new set of scenarios
+file_write_name = dir_name + "/#{set_number}#{FILE_EXT_SET}"
+file_write = File.open( file_write_name, "w" )
 
-# Array that keeps the clients of the current scenario created.
-# It will be cleared at every step
-scenario = Array.new
+file_write.printf("# SCENARIOS = %d\nVEHICLE CAPACITY = %d\n", scenarios, VEHICLE_CAPACITY)
+file_write.printf("DEPOT COORDINATES (X,Y) = (%d, %d)\n", rand( 0..cols*ZONE_WIDTH ), rand( 0..(zones.length/cols)*ZONE_HEIGHT ))
+file_write.printf("# ZONES = %d\n", zones.length)
+
+
+# Array that keeps scenarios and their probabilities to happen
+scenarios_set = Array.new
 
 (1..scenarios).each do |k|
 
-	# Clearing the scenario
-	scenario.clear
-
+	# Array that keeps the clients of the current scenario created.
+	# It will be created new at every step
+	scenario = Array.new
 	# Creating the clients:
-	scenario_clients = RandomGaussian.new( CLIENTS_AVERAGE, CLIENTS_STD_DEV ).rand.to_i
-	# First I have to find in which area it belongs
+	scenario_clients = Distribution::Normal.rng( CLIENTS_AVERAGE, CLIENTS_STD_DEV ).to_i
+	# First I have to find in which area every client belongs
 	(1..scenario_clients).each do
 
 		# Creating a client extracting a number between 1 and the total number
@@ -117,19 +121,24 @@ scenario = Array.new
 				zone_number+1,
 				rand( 0..ZONE_WIDTH ) + (zone_number%cols) * ZONE_WIDTH,
 				rand( 0..ZONE_HEIGHT ) + (zone_number/cols) * ZONE_HEIGHT,
-				RandomGaussian.new( zones[zone_number][:demand], DEMAND_STD_DEV ).rand,
-				RandomGaussian.new( zones[zone_number][:service_time], SERVICE_STD_DEV ).rand))
+				Distribution::Normal.rng( zones[zone_number][:demand], DEMAND_STD_DEV ).to_i,
+				Distribution::Normal.rng( zones[zone_number][:service_time], SERVICE_STD_DEV ).to_i))
 	end
+	# Computing the pdf probability of each scenario
+	scenario_prob = Distribution::Normal.pdf((scenario_clients-CLIENTS_AVERAGE).to_f/CLIENTS_STD_DEV)/CLIENTS_STD_DEV
+	scenarios_set.push([scenario, scenario_prob])
+end
 
-	# TODO: Check name with JFC?
-	file_write_name = "#{dir_name}/#{k}#{FILE_EXT_SCENARIO}"
-	file_write = File.open( file_write_name, "w" )
+# Normalizing each scenario probability computing the weighted average
+sum_prob = scenarios_set.collect{|x| x[1]}.reduce(:+)
 
-	# TODO: Check if this is really needed
-	# Preamble
+# Printing all information on file
+(0..scenarios_set.length-1).each do |k|
+
+	file_write.printf( "\nSCENARIO #%d\t# CLIENTS = %d\tPROBABILITY = %5.3f\n", k+1, scenarios_set[k][0].length, scenarios_set[k][1]/sum_prob )
 	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\n" )
-	scenario.each_with_index{ |client, h|
-		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%7.3f\t%7.3f\n",
+	scenarios_set[k][0].each_with_index{ |client, h|
+		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%3d\t%3d\n",
 				h+1,
 				client[:zone_number],
 				client[:x],
@@ -137,11 +146,11 @@ scenario = Array.new
 				client[:demand],
 				client[:service_time])
 	}
-
-	file_write.close
+	file_write.printf("\n")
 end
 
-printf( "Fuck yeah! Instance %s, Scenario %d, %d scenarios created. (◕‿◕✿)\n",
+file_write.close
+
+printf( "Fuck yeah! Instance %s, %d scenarios created. (◕‿◕✿)\n",
 	   zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" ),
-	   scenario_number,
 	   scenarios )
