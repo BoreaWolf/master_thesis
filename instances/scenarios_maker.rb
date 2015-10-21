@@ -9,8 +9,8 @@ require_relative "NormalDistribution.rb"
 
 # Constants
 DEFAULT_SCENARIOS = 4
-ZONE_WIDTH = 10
-ZONE_HEIGHT = 7
+ZONE_WIDTH = 1000
+ZONE_HEIGHT = 700
 
 CLIENTS_AVERAGE = 100
 CLIENTS_STD_DEV = 15
