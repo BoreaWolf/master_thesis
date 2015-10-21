@@ -33,10 +33,19 @@ end
 # ARGV[1] = zonegrid filename
 # If no zonegrid filename is given, then we will use the most recent one.
 scenarios = ( ARGV[ 0 ] || DEFAULT_SCENARIOS ).to_i
-# TODO: fix depending on the input that we give
+# As second argument we pretend the path to the grid file, if the path is
+# uncorrect there might be some problems :)
 zonegrid = ARGV[ 1 ]
 if zonegrid == nil then
 	zonegrid = Dir[ "#{DIR_INSTANCES}/*#{FILE_EXT_INSTANCE}" ].sort.last
+	puts "INSIDE"
+else
+	# Fixing one problem with the path, if "./" is missing at the beginning
+	# of the name file we put it.
+	# Still not consistent at all, the better way could be to find the shortest
+	# path to that file with some ruby functions knowing the name file.
+	# But given the fact that I will use this script there should be no such problems.
+	zonegrid = "./" + zonegrid unless zonegrid.include? "./"
 end
 
 # Creating the data structures needed: zone and client
@@ -73,6 +82,7 @@ cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 # Creating the directory of the instance, if it doesn't exist already
 dir_name = "#{DIR_SCENARIOS}/" +
 		zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
+puts "Dir_name: #{dir_name}"
 Dir.mkdir( dir_name ) unless File.exists?( dir_name )
 
 # Getting the number of set of scenarios already created
@@ -138,7 +148,7 @@ sum_prob = scenarios_set.collect{|x| x[1]}.reduce(:+)
 	file_write.printf( "\nSCENARIO #%d\t# CLIENTS = %d\tPROBABILITY = %5.3f\n", k+1, scenarios_set[k][0].length, scenarios_set[k][1]/sum_prob )
 	file_write.printf( "CLIENT\tZONE\tX\tY\tDEMAND\tS_TIME\n" )
 	scenarios_set[k][0].each_with_index{ |client, h|
-		file_write.printf( "%3d\t%3d\t%3d\t%3d\t%3d\t%3d\n",
+		file_write.printf( "%3d\t%3d\t%5d\t%5d\t%3d\t%3d\n",
 				h+1,
 				client[:zone_number],
 				client[:x],

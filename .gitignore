@@ -1,4 +1,5 @@
 instances/instances/*
 instances/scenarios/*
 *~
-
+cvrp_packing/*
+vrptwimd/*
