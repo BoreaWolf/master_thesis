@@ -19,6 +19,9 @@ DEMAND_STD_DEV = 20
 SERVICE_STD_DEV = 20
 
 VEHICLE_CAPACITY = 80
+DEMAND_MIN = 1
+SERVICE_TIME_MIN = 10
+
 # Useful functions
 # This function calculates the cumulative sum of an array
 class Array
@@ -38,7 +41,6 @@ scenarios = ( ARGV[ 0 ] || DEFAULT_SCENARIOS ).to_i
 zonegrid = ARGV[ 1 ]
 if zonegrid == nil then
 	zonegrid = Dir[ "#{DIR_INSTANCES}/*#{FILE_EXT_INSTANCE}" ].sort.last
-	puts "INSIDE"
 else
 	# Fixing one problem with the path, if "./" is missing at the beginning
 	# of the name file we put it.
@@ -82,7 +84,6 @@ cols = File.open( zonegrid, &:readline ).scan( /\)/ ).length
 # Creating the directory of the instance, if it doesn't exist already
 dir_name = "#{DIR_SCENARIOS}/" +
 		zonegrid.gsub( DIR_INSTANCES + "/", "" ).gsub( FILE_EXT_INSTANCE, "" )
-puts "Dir_name: #{dir_name}"
 Dir.mkdir( dir_name ) unless File.exists?( dir_name )
 
 # Getting the number of set of scenarios already created
@@ -126,13 +127,23 @@ scenarios_set = Array.new
 		# We have the zone, yeah
 		# Then we save him in the scenario with his other informations
 		# randomly generated
+
+		# Protecting ourselves from negative number.
+		# These are possible given the probability distribution used and the
+		# low mean associated to them.
+		demand = Distribution::Normal.rng( zones[zone_number][:demand], DEMAND_STD_DEV ).to_i
+		demand = DEMAND_MIN unless demand >= DEMAND_MIN
+		service_time = Distribution::Normal.rng( zones[zone_number][:service_time], SERVICE_STD_DEV ).to_i
+		service_time = SERVICE_TIME_MIN unless service_time >= SERVICE_TIME_MIN
+
 		scenario.push(
 			ClientRequest.new(
 				zone_number+1,
 				rand( 0..ZONE_WIDTH ) + (zone_number%cols) * ZONE_WIDTH,
 				rand( 0..ZONE_HEIGHT ) + (zone_number/cols) * ZONE_HEIGHT,
-				Distribution::Normal.rng( zones[zone_number][:demand], DEMAND_STD_DEV ).to_i,
-				Distribution::Normal.rng( zones[zone_number][:service_time], SERVICE_STD_DEV ).to_i))
+				demand,
+				service_time ) )
+				
 	end
 	# Computing the pdf probability of each scenario
 	scenario_prob = Distribution::Normal.pdf((scenario_clients-CLIENTS_AVERAGE).to_f/CLIENTS_STD_DEV)/CLIENTS_STD_DEV
