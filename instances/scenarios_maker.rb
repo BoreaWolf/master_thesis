@@ -4,23 +4,8 @@
 # Date: 15 October 2015
 # A program that generates a given number of scenarios, starting from a zonegrid.
 
-require_relative "filenames.rb"
+require_relative "constants.rb"
 require_relative "NormalDistribution.rb"
-
-# Constants
-DEFAULT_SCENARIOS = 4
-ZONE_WIDTH = 1000
-ZONE_HEIGHT = 700
-
-CLIENTS_AVERAGE = 100
-CLIENTS_STD_DEV = 15
-
-DEMAND_STD_DEV = 20
-SERVICE_STD_DEV = 20
-
-VEHICLE_CAPACITY = 80
-DEMAND_MIN = 1
-SERVICE_TIME_MIN = 10
 
 # Useful functions
 # This function calculates the cumulative sum of an array
@@ -132,9 +117,9 @@ scenarios_set = Array.new
 		# These are possible given the probability distribution used and the
 		# low mean associated to them.
 		demand = Distribution::Normal.rng( zones[zone_number][:demand], DEMAND_STD_DEV ).to_i
-		demand = DEMAND_MIN unless demand >= DEMAND_MIN
+		demand = SCENARIO_DEMAND_MIN unless demand >= SCENARIO_DEMAND_MIN
 		service_time = Distribution::Normal.rng( zones[zone_number][:service_time], SERVICE_STD_DEV ).to_i
-		service_time = SERVICE_TIME_MIN unless service_time >= SERVICE_TIME_MIN
+		service_time = SCENARIO_SERVICE_TIME_MIN unless service_time >= SCENARIO_SERVICE_TIME_MIN
 
 		scenario.push(
 			ClientRequest.new(

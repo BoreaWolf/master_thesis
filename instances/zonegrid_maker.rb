@@ -7,18 +7,7 @@
 # - average demand per client
 # - average service time per client
 
-require_relative "filenames.rb"
-
-# Constants
-HIGH_POP = 0.25
-LOW_POP = 0.10
-CLIENT_RANGE_HIGH = [ 70, 100 ]
-CLIENT_RANGE_NORMAL = [ 10, 70 ]
-CLIENT_RANGE_LOW = [ 1, 10 ]
-DEMAND_MIN = 10
-DEMAND_MAX = 120
-SERVICE_TIME_MIN = 30
-SERVICE_TIME_MAX = 300
+require_relative "constants.rb"
 
 # Get dimensions m x n from command line
 rows = ( ARGV[ 0 ] || 2 ).to_i
@@ -44,8 +33,8 @@ for i in 1..zone_number
 	end
 
 	zones.push( Zone.new( cli,
-						  rand( DEMAND_MIN..DEMAND_MAX ),
-						  rand( SERVICE_TIME_MIN..SERVICE_TIME_MAX ) )
+						  rand( ZONE_DEMAND_MIN..ZONE_DEMAND_MAX ),
+						  rand( ZONE_SERVICE_TIME_MIN..ZONE_SERVICE_TIME_MAX ) )
 			  )
 end
 
